@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type builder struct {
+type Builder struct {
 	query  any
 	source []string
 	sort   []map[string]any
@@ -13,8 +13,8 @@ type builder struct {
 	from   int
 }
 
-func New() *builder {
-	return &builder{}
+func New() *Builder {
+	return &Builder{}
 }
 
 type Generatable interface {
@@ -26,7 +26,7 @@ type Sort struct {
 	Order string // asc or desc
 }
 
-func (b *builder) Build() (string, error) {
+func (b *Builder) Build() (string, error) {
 	body := struct {
 		Size   int              `json:"size,omitempty"`
 		From   int              `json:"from,omitempty"`
@@ -48,27 +48,27 @@ func (b *builder) Build() (string, error) {
 	return string(query), nil
 }
 
-func (b *builder) Size(value int) *builder {
+func (b *Builder) Size(value int) *Builder {
 	b.size = value
 	return b
 }
 
-func (b *builder) From(value int) *builder {
+func (b *Builder) From(value int) *Builder {
 	b.from = value
 	return b
 }
 
-func (b *builder) Source(value []string) *builder {
+func (b *Builder) Source(value []string) *Builder {
 	b.source = value
 	return b
 }
 
-func (b *builder) Query(query Generatable) *builder {
+func (b *Builder) Query(query Generatable) *Builder {
 	b.query = query.generate()
 	return b
 }
 
-func (b *builder) Sort(sort ...Sort) *builder {
+func (b *Builder) Sort(sort ...Sort) *Builder {
 	if sort != nil && len(sort) > 0 {
 		sortList := make([]map[string]any, len(sort))
 		for i, s := range sort {
