@@ -6,11 +6,12 @@ import (
 )
 
 type Builder struct {
-	query  any
-	source []string
-	sort   []map[string]any
-	size   int
-	from   int
+	query       any
+	source      []string
+	sort        []map[string]any
+	size        int
+	from        int
+	searchAfter []string
 }
 
 func New() *Builder {
@@ -28,17 +29,19 @@ type Sort struct {
 
 func (b *Builder) Build() (string, error) {
 	body := struct {
-		Size   int              `json:"size,omitempty"`
-		From   int              `json:"from,omitempty"`
-		Query  any              `json:"query,omitempty"`
-		Sort   []map[string]any `json:"sort,omitempty"`
-		Source []string         `json:"_source,omitempty"`
+		Size        int              `json:"size,omitempty"`
+		From        int              `json:"from,omitempty"`
+		Query       any              `json:"query,omitempty"`
+		Sort        []map[string]any `json:"sort,omitempty"`
+		Source      []string         `json:"_source,omitempty"`
+		SearchAfter []string         `json:"search_after,omitempty"`
 	}{
 		b.size,
 		b.from,
 		b.query,
 		b.sort,
 		b.source,
+		b.searchAfter,
 	}
 
 	query, err := json.Marshal(body)
@@ -80,6 +83,11 @@ func (b *Builder) Sort(sort ...Sort) *Builder {
 		b.sort = append(b.sort, sortList...)
 	}
 
+	return b
+}
+
+func (b *Builder) SearchAfter(values ...string) *Builder {
+	b.searchAfter = values
 	return b
 }
 

@@ -164,6 +164,16 @@ func TestQuery(t *testing.T) {
 		}`), query)
 	})
 
+	t.Run("search_after", func(t *testing.T) {
+		builder := queryBuilder.New()
+		query, err := builder.SearchAfter("0", "1").Build()
+
+		assert.NoError(t, err)
+		assert.Equal(t, queryBuilder.Trim(`{
+			"search_after":["0","1"]
+		}`), query)
+	})
+
 	t.Run("exists", func(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
