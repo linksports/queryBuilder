@@ -188,6 +188,28 @@ func TestQuery(t *testing.T) {
 		}`), query)
 	})
 
+	t.Run("range", func(t *testing.T) {
+		builder := queryBuilder.New()
+		query, err := builder.Query(
+			queryBuilder.Range("target", queryBuilder.RangeParams{
+				Gte: 10,
+				Lt:  "hanako",
+			}),
+		).Build()
+
+		assert.NoError(t, err)
+		assert.Equal(t, queryBuilder.Trim(`{
+			"query":{
+				"range":{
+					"target":{
+						"gte":10,
+						"lt":"hanako"
+					}
+				}
+			}
+		}`), query)
+	})
+
 	t.Run("function_score", func(t *testing.T) {
 		builder := queryBuilder.New()
 		builder.Query(

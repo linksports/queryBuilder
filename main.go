@@ -244,3 +244,29 @@ func (e *exists) generate() any {
 func Exists(field string) Generatable {
 	return &exists{field}
 }
+
+type rangeQuery struct {
+	fieldName string
+	params    RangeParams
+}
+
+type RangeParams struct {
+	Gte any `json:"gte,omitempty"`
+	Gt  any `json:"gt,omitempty"`
+	Lte any `json:"lte,omitempty"`
+	Lt  any `json:"lt,omitempty"`
+}
+
+func (r *rangeQuery) generate() any {
+	rangeParamsMap := map[string]RangeParams{}
+	rangeParamsMap[r.fieldName] = r.params
+	return struct {
+		Range map[string]RangeParams `json:"range"`
+	}{
+		rangeParamsMap,
+	}
+}
+
+func Range(field string, params RangeParams) Generatable {
+	return &rangeQuery{fieldName: field, params: params}
+}
