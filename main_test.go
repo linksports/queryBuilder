@@ -210,6 +210,29 @@ func TestQuery(t *testing.T) {
 		}`), query)
 	})
 
+	t.Run("multi_match", func(t *testing.T) {
+		builder := queryBuilder.New()
+		query, err := builder.Query(
+			queryBuilder.MultiMatch(queryBuilder.MultiMatchParams{
+				Qry:    "Elastic Search",
+				Fields: []string{"clusterName", "searchEngine^2"},
+			}),
+		).Build()
+
+		assert.NoError(t, err)
+		assert.Equal(t, queryBuilder.Trim(`{
+			"query":{
+				"multi_match":{
+					"fields":[
+						"clusterName",
+						"searchEngine^2"
+					],
+					"query":"Elastic Search"
+				}
+			}
+		}`), query)
+	})
+
 	t.Run("function_score", func(t *testing.T) {
 		builder := queryBuilder.New()
 		builder.Query(
