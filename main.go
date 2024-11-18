@@ -14,6 +14,7 @@ type Builder struct {
 	size        int
 	from        int
 	searchAfter []string
+	aggs        map[string]map[string]any
 }
 
 func New() *Builder {
@@ -31,12 +32,13 @@ type Sort struct {
 
 func (b *Builder) Build() (string, error) {
 	body := struct {
-		Size        int              `json:"size,omitempty"`
-		From        int              `json:"from,omitempty"`
-		Query       any              `json:"query,omitempty"`
-		Sort        []map[string]any `json:"sort,omitempty"`
-		Source      []string         `json:"_source,omitempty"`
-		SearchAfter []string         `json:"search_after,omitempty"`
+		Size        int                       `json:"size,omitempty"`
+		From        int                       `json:"from,omitempty"`
+		Query       any                       `json:"query,omitempty"`
+		Sort        []map[string]any          `json:"sort,omitempty"`
+		Source      []string                  `json:"_source,omitempty"`
+		SearchAfter []string                  `json:"search_after,omitempty"`
+		Aggs        map[string]map[string]any `json:"aggs,omitempty"`
 	}{
 		b.size,
 		b.from,
@@ -44,6 +46,7 @@ func (b *Builder) Build() (string, error) {
 		b.sort,
 		b.source,
 		b.searchAfter,
+		b.aggs,
 	}
 
 	query, err := json.Marshal(body)
@@ -90,6 +93,17 @@ func (b *Builder) Sort(sort ...Sort) *Builder {
 
 func (b *Builder) SearchAfter(values ...string) *Builder {
 	b.searchAfter = values
+	return b
+}
+
+func (b *Builder) Aggs(values ...Generatable) *Builder {
+	aggs := make(map[string]map[string]any, len(values))
+	for _, a := range values {
+		for k, v := range a.generate().(map[string]map[string]any) {
+			aggs[k] = v
+		}
+	}
+	b.aggs = aggs
 	return b
 }
 
@@ -290,4 +304,33 @@ func MultiMatch(params MultiMatchParams) Generatable {
 	q := esquery.MultiMatch()
 	q.Fields(params.Fields...).Query(params.Query)
 	return &multiMatchQuery{params: *q}
+}
+
+type aggregationQuery struct {
+	params esquery.TermsAggregation
+}
+
+type AggregateParams struct {
+	Name      string
+	FieldName string
+	Order     map[string]string
+	Size      uint64
+}
+
+func (m *aggregationQuery) generate() any {
+	return map[string]map[string]any{
+		m.params.Name(): m.params.Map(),
+	}
+}
+
+func TermsAgg(params AggregateParams) Generatable {
+	q := esquery.TermsAgg(params.Name, params.FieldName)
+	if params.Size != 0 {
+		q.Size(params.Size)
+	}
+	if params.Order != nil {
+		q.Order(params.Order)
+	}
+
+	return &aggregationQuery{params: *q}
 }
