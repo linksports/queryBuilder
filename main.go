@@ -314,7 +314,7 @@ type AggregateParams struct {
 	Name      string
 	FieldName string
 	Order     map[string]string
-	Size      uint64
+	Size      int
 }
 
 func (m *aggregationQuery) generate() any {
@@ -326,7 +326,7 @@ func (m *aggregationQuery) generate() any {
 func TermsAgg(params AggregateParams) Generatable {
 	q := esquery.TermsAgg(params.Name, params.FieldName)
 	if params.Size != 0 {
-		q.Size(params.Size)
+		q.Size(uint64(params.Size))
 	}
 	if params.Order != nil {
 		q.Order(params.Order)
