@@ -3,6 +3,8 @@ package queryBuilder
 import (
 	"encoding/json"
 	"strings"
+
+	"github.com/aquasecurity/esquery"
 )
 
 type Builder struct {
@@ -269,4 +271,23 @@ func (r *rangeQuery) generate() any {
 
 func Range(field string, params RangeParams) Generatable {
 	return &rangeQuery{fieldName: field, params: params}
+}
+
+type multiMatchQuery struct {
+	params esquery.MultiMatchQuery
+}
+
+type MultiMatchParams struct {
+	Query  any
+	Fields []string
+}
+
+func (m *multiMatchQuery) generate() any {
+	return m.params.Map()
+}
+
+func MultiMatch(params MultiMatchParams) Generatable {
+	q := esquery.MultiMatch()
+	q.Fields(params.Fields...).Query(params.Query)
+	return &multiMatchQuery{params: *q}
 }
