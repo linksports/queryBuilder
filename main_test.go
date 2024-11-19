@@ -164,6 +164,159 @@ func TestQuery(t *testing.T) {
 		}`), query)
 	})
 
+	t.Run("aggs_term", func(t *testing.T) {
+		builder := queryBuilder.New()
+		query, err := builder.Aggs(
+			queryBuilder.TermsAgg(queryBuilder.AggregateParams{
+				Name:      "sportID_term",
+				FieldName: "sport_id",
+				Order: map[string]string{
+					"_count": "desc",
+				},
+				Size: 10,
+			}),
+		).Build()
+
+		assert.NoError(t, err)
+		assert.Equal(t, queryBuilder.Trim(`{
+			"aggs":{
+				"sportID_term":{
+					"terms":{
+						"field":"sport_id",
+						"order":{"_count":"desc"},
+						"size":10
+						}
+				}
+			}
+		}`), query)
+	})
+	t.Run("multi_aggs_term", func(t *testing.T) {
+		builder := queryBuilder.New()
+		query, err := builder.Aggs(
+			queryBuilder.TermsAgg(queryBuilder.AggregateParams{
+				Name:      "sportID_term",
+				FieldName: "sport_id",
+				Order: map[string]string{
+					"_count": "desc",
+				},
+				Size: 10,
+			}),
+			queryBuilder.TermsAgg(queryBuilder.AggregateParams{
+				Name:      "sportID_term2",
+				FieldName: "sport_id2",
+				Order: map[string]string{
+					"_count": "asc",
+				},
+				Size: 12,
+			}),
+		).Build()
+
+		assert.NoError(t, err)
+		assert.Equal(t, queryBuilder.Trim(`{
+			"aggs":{
+				"sportID_term":{
+					"terms":{
+						"field":"sport_id",
+						"order":{"_count":"desc"},
+						"size":10
+						}
+				},
+				"sportID_term2":{
+					"terms":{
+						"field":"sport_id2",
+						"order":{"_count":"asc"},
+						"size":12
+					}
+				}
+			}
+		}`), query)
+	})
+
+	t.Run("query+aggs_term+size+from", func(t *testing.T) {
+		builder := queryBuilder.New()
+		query, err := builder.Query(
+			queryBuilder.FunctionScore(queryBuilder.Bool().Must(
+				queryBuilder.MultiMatch(queryBuilder.MultiMatchParams{
+					Query:  "teamName1 teamName2 tokyo",
+					Fields: []string{"name^3", "description", "city"},
+				}),
+			).MustNot(
+				queryBuilder.Exists("deleted_at"),
+			),
+				[]queryBuilder.Function{
+					{
+						Filter: queryBuilder.Exists("logo"),
+						Weight: 3,
+					},
+					{
+						Filter: queryBuilder.Exists("photo"),
+						Weight: 1.5,
+					},
+				},
+			),
+		).Aggs(
+			queryBuilder.TermsAgg(queryBuilder.AggregateParams{
+				Name:      "sportID_term",
+				FieldName: "sport_id",
+				Order: map[string]string{
+					"_count": "desc",
+				},
+				Size: 10,
+			}),
+		).Size(20).From(5).Build()
+
+		assert.NoError(t, err)
+		assert.Equal(t, queryBuilder.Trim(`{"size":20,
+			"from":5,
+			"query":{
+				"function_score":{
+					"query":{
+						"bool":{
+							"must":[{
+								"multi_match":{
+									"fields":["name^3","description","city"],
+									"query":"teamName1 teamName2 tokyo"
+								}	
+							}],
+							"must_not":[{
+								"exists":{
+									"field":"deleted_at"
+								}
+							}]
+						}
+					},
+					"functions":[
+						{
+							"filter":{
+								"exists":{
+									"field":"logo"
+								}
+							},
+							"weight":3
+						},
+						{
+							"filter":{
+								"exists":{
+									"field":"photo"
+								}
+							},
+							"weight":1.5
+						}
+					]
+				}
+			},
+			"aggs":{
+				"sportID_term":{
+					"terms":{
+						"field":"sport_id",
+						"order":{"_count":"desc"},
+						"size":10
+					}
+				}
+			}
+		}`), query)
+	})
+
 	t.Run("search_after", func(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.SearchAfter("0", "1").Build()
