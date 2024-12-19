@@ -12,7 +12,7 @@ func TestQuery(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
 			queryBuilder.MatchAll(),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -26,7 +26,7 @@ func TestQuery(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
 			queryBuilder.Match("target", "v"),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -40,7 +40,7 @@ func TestQuery(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
 			queryBuilder.MatchPhrase("target", []string{"red", "blue", "green"}),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -54,7 +54,7 @@ func TestQuery(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
 			queryBuilder.Term("target.keyword", "v"),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -68,7 +68,7 @@ func TestQuery(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
 			queryBuilder.Terms("target.keyword", []int{1, 2, 3}),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -82,7 +82,7 @@ func TestQuery(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
 			queryBuilder.Terms("target.keyword", []string{"1", "2", "3"}),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -96,7 +96,7 @@ func TestQuery(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
 			queryBuilder.Prefix("target", "v"),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -113,7 +113,7 @@ func TestQuery(t *testing.T) {
 		).Sort(
 			queryBuilder.Sort{"sort1", "asc"},
 			queryBuilder.Sort{"sort2", "desc"},
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -131,7 +131,7 @@ func TestQuery(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
 			queryBuilder.Term("target.keyword", "v"),
-		).Source([]string{"a", "b"}).Build()
+		).Source([]string{"a", "b"}).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -148,7 +148,7 @@ func TestQuery(t *testing.T) {
 			queryBuilder.Term("target.keyword", "v"),
 		).Sort(
 			queryBuilder.Sort{"sort1", "asc"},
-		).Source([]string{"taro", "hanako"}).Size(10).From(5).Build()
+		).Source([]string{"taro", "hanako"}).Size(10).From(5).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -175,7 +175,7 @@ func TestQuery(t *testing.T) {
 				},
 				Size: 10,
 			}),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -209,7 +209,7 @@ func TestQuery(t *testing.T) {
 				},
 				Size: 12,
 			}),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -263,7 +263,7 @@ func TestQuery(t *testing.T) {
 				},
 				Size: 10,
 			}),
-		).Size(20).From(5).Build()
+		).Size(20).From(5).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{"size":20,
@@ -319,7 +319,7 @@ func TestQuery(t *testing.T) {
 
 	t.Run("search_after", func(t *testing.T) {
 		builder := queryBuilder.New()
-		query, err := builder.SearchAfter("0", "1").Build()
+		query, err := builder.SearchAfter("0", "1").Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -331,7 +331,7 @@ func TestQuery(t *testing.T) {
 		builder := queryBuilder.New()
 		query, err := builder.Query(
 			queryBuilder.Exists("target"),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -348,7 +348,7 @@ func TestQuery(t *testing.T) {
 				Gte: 10,
 				Lt:  "hanako",
 			}),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -370,7 +370,7 @@ func TestQuery(t *testing.T) {
 				Query:  "Elastic Search",
 				Fields: []string{"clusterName", "searchEngine^2"},
 			}),
-		).Build()
+		).Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
@@ -404,7 +404,7 @@ func TestQuery(t *testing.T) {
 			),
 		)
 
-		query, err := builder.Build()
+		query, err := builder.Build(queryBuilder.ES)
 
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{

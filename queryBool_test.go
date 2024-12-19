@@ -15,7 +15,7 @@ func TestQueryBool(t *testing.T) {
 				queryBuilder.Bool().Must(
 					queryBuilder.Term("target.keyword", "v"),
 				),
-			).Build()
+			).Build(queryBuilder.ES)
 
 			assert.NoError(t, err)
 			assert.Equal(t, queryBuilder.Trim(`{
@@ -36,7 +36,7 @@ func TestQueryBool(t *testing.T) {
 					queryBuilder.Term("target1.keyword", "v1"),
 					queryBuilder.Term("target2.keyword", "v2"),
 				),
-			).Build()
+			).Build(queryBuilder.ES)
 
 			assert.NoError(t, err)
 			assert.Equal(t, queryBuilder.Trim(`{
@@ -57,7 +57,7 @@ func TestQueryBool(t *testing.T) {
 				queryBuilder.Bool().Must(
 					queryBuilder.Terms("target.keyword", []int{1, 2, 3}),
 				),
-			).Build()
+			).Build(queryBuilder.ES)
 
 			assert.NoError(t, err)
 			assert.Equal(t, queryBuilder.Trim(`{
@@ -79,7 +79,7 @@ func TestQueryBool(t *testing.T) {
 				).MustNot(
 					queryBuilder.Terms("not.keyword", []string{"1", "2", "3"}),
 				),
-			).Build()
+			).Build(queryBuilder.ES)
 
 			assert.NoError(t, err)
 			assert.Equal(t, queryBuilder.Trim(`{
@@ -109,7 +109,7 @@ func TestQueryBool(t *testing.T) {
 						queryBuilder.Terms("target4.keyword", []int{1, 2, 3}),
 					),
 				),
-			).Build()
+			).Build(queryBuilder.ES)
 
 			assert.NoError(t, err)
 			assert.Equal(t, queryBuilder.Trim(`{
@@ -145,7 +145,7 @@ func TestQueryBool(t *testing.T) {
 		boolQuery.Must(queryBuilder.Terms("terms", []int{1, 2, 3}))
 		boolQuery.MustNot(queryBuilder.Term("notTarget", "exclusion"))
 
-		query, err := queryBuilder.New().Query(boolQuery).Build()
+		query, err := queryBuilder.New().Query(boolQuery).Build(queryBuilder.ES)
 		assert.NoError(t, err)
 		assert.Equal(t, queryBuilder.Trim(`{
 			"query":{
