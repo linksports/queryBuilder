@@ -7,6 +7,12 @@ import (
 	"github.com/aquasecurity/esquery"
 )
 
+type DataSource string
+
+const (
+	ES DataSource = "ElasticSearch"
+)
+
 type Builder struct {
 	query       any
 	source      []string
@@ -30,7 +36,16 @@ type Sort struct {
 	Order string // asc or desc
 }
 
-func (b *Builder) Build() (string, error) {
+func (b *Builder) Build(dc DataSource) (string, error) {
+	switch dc {
+	case ES:
+		fallthrough
+	default:
+		return b.buildElasticSearch()
+	}
+}
+
+func (b *Builder) buildElasticSearch() (string, error) {
 	body := struct {
 		Size        int                       `json:"size,omitempty"`
 		From        int                       `json:"from,omitempty"`
@@ -77,7 +92,7 @@ func (b *Builder) Query(query Generatable) *Builder {
 }
 
 func (b *Builder) Sort(sort ...Sort) *Builder {
-	if sort != nil && len(sort) > 0 {
+	if len(sort) > 0 {
 		sortList := make([]map[string]any, len(sort))
 		for i, s := range sort {
 			order := map[string]string{"order": s.Order}
