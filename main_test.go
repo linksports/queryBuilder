@@ -3,7 +3,7 @@ package queryBuilder_test
 import (
 	"testing"
 
-	queryBuilder "github.com/linksports/esQueryBuilder"
+	"github.com/linksports/queryBuilder"
 	"github.com/stretchr/testify/assert"
 )
 

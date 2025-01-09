@@ -1,4 +1,4 @@
-module github.com/linksports/esQueryBuilder
+module github.com/linksports/queryBuilder
 
 go 1.23
 
